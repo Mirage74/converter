@@ -167,17 +167,31 @@ class Mainpage extends Component {
                 {manualRateButt}
             </Row>)
 
+        let tNm = ""
+        let tEur = 0
+        let tPln = 0
+        if (currMax.length > 0) {
+            tNm = currMax[1]
+            tEur = currMax[0].toFixed(2)
+            tPln = (currMax[0] * currentRate).toFixed(2)
+        }
         let maxStr = (<> <br />
             <Row>
                 <Col sm={{ offset: 1 }}>
-                    <b>Max</b> transaction: "{currMax[1]}":   <b>{currMax[0].toFixed(2)}</b> EUR / <b>{(currMax[0] * currentRate).toFixed(2)}</b> PLN
+                    <b>Max</b> transaction: "{tNm}":   <b>{tEur}</b> EUR / <b>{tPln}</b> PLN
                     </Col>
             </Row > </>)
 
+        tEur = 0
+        tPln = 0
+        if (currSum > 0) {
+            tEur = currSum.toFixed(2)
+            tPln = (currSum * currentRate).toFixed(2)
+        }
         let sumStr = (<> <br />
             <Row>
                 <Col sm={{ offset: 1 }}>
-                    <b>Sum</b> all transactions: <b>{currSum.toFixed(2)}</b> EUR / <b>{(currSum * currentRate).toFixed(2)}</b> PLN
+                    <b>Sum</b> all transactions: <b>{tEur}</b> EUR / <b>{tPln}</b> PLN
                     </Col>
             </Row > </>)
 
@@ -303,8 +317,9 @@ class Mainpage extends Component {
                     {sortAmntDown}
                 </Col>
             </Row>
-            <TrnsList trns={currTrns} sortBy={sortBy} />
+            <TrnsList trns={currTrns} sortBy={sortBy} rate={currentRate} />
         </>)
+
 
         return (
             <div>
