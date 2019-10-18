@@ -1,9 +1,4 @@
-#radio-rates {
-  margin-left: 0px;	
+.row-custom {
+    border: solid 1px #000000;
+    font-size: 1.2rem
 }
-
-#label-rate {
-  flex-direction: row;
-  width: 200px;
-}
-

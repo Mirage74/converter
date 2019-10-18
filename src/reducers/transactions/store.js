@@ -3,7 +3,7 @@ import { TransactionsTypes } from '../../actions';
 
 const INITIAL_STATE = {
   transactions: [],
-  max: 0,
+  max: [0, 0],
   sum: 0
 }
 

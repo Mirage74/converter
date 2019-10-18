@@ -2,7 +2,8 @@ import * as TransactionsTypes from './transactions/constant'
 import * as TransactionsActions from './transactions/action'
 
 export {
-  TransactionsTypes
+  TransactionsTypes,
+  TransactionsActions
 }
 
 export * from './utils'
