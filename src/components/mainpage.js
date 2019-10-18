@@ -88,7 +88,7 @@ class Mainpage extends Component {
         if (isNum) {
             let oneTrn = {
                 "transName": addTrnName,
-                "amountEUR": addAmount
+                "amountEUR": replAmnt
             }
             let res = await this.addTransaction(oneTrn)
             if (typeof res === "string") {
@@ -127,8 +127,6 @@ class Mainpage extends Component {
                     </Col>
                 </Row>
             </RadioGroup>)
-
-        let manualRateButt
 
         if (!editRate) {
             manualRateButt = (
