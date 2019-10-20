@@ -9,6 +9,8 @@ import { BACKEND_URL } from "../../config"
 import "../mainpage.css"
 
 class TrnsList extends Component {
+    
+    numberWithCommas = (x) => { return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") }
 
     compareNameUp(a, b) {
         if (a[1] < b[1]) {
@@ -65,7 +67,7 @@ class TrnsList extends Component {
 
         let trHeader = (
             <Row>
-                <Col sm={{ span: 4, offset: 0 }} >
+                <Col sm={{ span: 4, offset: 1 }} >
                     trn name:
                 </Col>
                 <Col sm={{ span: 3, offset: 0 }} className="text-right" >
@@ -78,17 +80,17 @@ class TrnsList extends Component {
         )
 
         let trnsList = arrSorted.map(item =>
-            <Row key={uuid()} className="row-custom">
-                <Col sm={{ span: 4, offset: 0 }} >
+            <Row key={uuid()} >
+                <Col className="row-custom" sm={{ span: 4, offset: 1 }} >
                     {item[1]}
                 </Col>
-                <Col sm={{ span: 3, offset: 0 }} className="text-right" >
-                    {item[2].toFixed(2)}
+                <Col sm={{ span: 3, offset: 0 }} className="text-right row-custom" >
+                    {this.numberWithCommas(item[2].toFixed(2))}
                 </Col>
-                <Col sm={{ span: 3, offset: 0 }} className="text-right" >
-                    {(item[2] * rate).toFixed(2)}
+                <Col sm={{ span: 3, offset: 0 }} className="text-right row-custom" >
+                    {this.numberWithCommas((item[2] * rate).toFixed(2))}
                 </Col>                
-                <Col sm={{ span: 1, offset: 1 }} className="text-right" >
+                <Col sm={{ span: 1, offset: 0 }} className="text-right row-custom" >
                     <i className="fas fa-times"
                         style={{ cursor: 'pointer', float: 'right', color: 'red' }}
                         onClick={this.onDeleteClick.bind(this, item[0])}
@@ -97,20 +99,15 @@ class TrnsList extends Component {
             </Row>
         )
 
-        let forRender = (
-            <>
+        let forRender = (<>
             <br />
             {trHeader}            
             {trnsList}
-            </>
-        )
+            </> )
 
         return (
-            <>
-                {forRender}
-            </>
+            <>{forRender}</>
         )
-
     }
 }
 

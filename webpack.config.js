@@ -1,5 +1,6 @@
 const HtmlWebPackPlugin = require("html-webpack-plugin")
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const CopyPlugin = require('copy-webpack-plugin')
 
 module.exports = {
   module: {
@@ -42,7 +43,10 @@ module.exports = {
       filename: "style.css",
       chunkFilename: "chunk_id.css",
       ignoreOrder: false
-    })
+    }),
+    new CopyPlugin([
+      { from: 'public'}
+    ])
   ],
   devtool: "eval-sourcemap"
 }

@@ -5,12 +5,20 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import TrnsList from "./layout/trnslist"
 import About from "./layout/about"
-import { RadioGroup, Radio } from 'react-radio-group'
+import {HeaderRadio} from "./layout/headerradio"
+import RadioList from "./layout/radiolist"
+import Rates from "./layout/rates"
+import MaxItem from "./layout/maxitem"
+import SumAll from "./layout/sumall"
+import AddTrn from "./layout/addtrn"
+import PlusMinus from "./layout/plusminus"
+import SortBy from "./layout/sortby"
 import { BACKEND_URL, RATE_PLN_API, MAX_RATE_DIFF_IN_PROCENT } from "../config"
 import axios from 'axios'
 import "./mainpage.css"
 
 class Mainpage extends Component {
+
     state = {
         radioButtonSelected: "0",
         rateNBP: 4,
@@ -39,25 +47,25 @@ class Mainpage extends Component {
         this.setState({ expended: !this.state.expended })
     }
 
-    handleChangeRadio = (value) => {
+    handleChangeRadioCB = (value) => {
         this.setState({ radioButtonSelected: value })
         if (value === "0") { this.setState({ currentRate: this.state.rateNBP }) }
         if (value === "1") { this.setState({ currentRate: this.state.rateManual }) }
     }
 
-    editManualRate = () => { this.setState({ editRate: true }) }
+    editManualRateCB = () => { this.setState({ editRate: true }) }
 
-    resetManualRate = () => {
+    resetManualRateCB = () => {
         const { rateManualNew, rateNBP, radioButtonSelected } = this.state
         let replRate = rateManualNew
         replRate = replRate.replace(",", ".")
         const isNum = (/^\d+\.\d+$/.test(replRate)) || (/^\d+$/.test(replRate))
         const strEr = `Rate must be a number +-${MAX_RATE_DIFF_IN_PROCENT}% from NBP rate`
         if (isNum) {
-            let rate = parseInt(10000 * replRate) / 10000
-            if ((rate >= (1 - MAX_RATE_DIFF_IN_PROCENT / 100) * rateNBP) && (rate <= (1 + MAX_RATE_DIFF_IN_PROCENT) * rateNBP)) {
-                this.setState({ rateManual: replRate, rateManualNew: replRate, editRate: false, isInvalidRate: "" })
-                if (radioButtonSelected === "1") { this.setState({ currentRate: replRate }) }
+            let rate = (parseInt(10000 * replRate) / 10000).toFixed(4)
+            if ((rate >= (1 - MAX_RATE_DIFF_IN_PROCENT / 100) * rateNBP) && (rate <= (1 + MAX_RATE_DIFF_IN_PROCENT / 100) * rateNBP)) {
+                this.setState({ rateManual: rate, rateManualNew: rate, editRate: false, isInvalidRate: "" })
+                if (radioButtonSelected === "1") { this.setState({ currentRate: rate }) }
             } else { this.setState({ isInvalidRate: strEr }) }
         } else { this.setState({ isInvalidRate: strEr }) }
     }
@@ -101,222 +109,29 @@ class Mainpage extends Component {
 
     render() {
         const { currTrns, currMax, currSum } = this.props
-        const { radioButtonSelected, isInvalidRate, isInvalidAmount, isInvalidName, rateManual, rateManualNew, rateNBP, editRate, currentRate, addAmount, addTrnName, sortBy, expended } = this.state
-        let leftCol, rightCol, manualRateButt
-        const headerRadio = (
-            <Row>
-                <Col sm={{ span: 6, offset: 0 }} md={{ span: 5, offset: 1 }} lg={{ span: 4, offset: 1 }}>
-                    <h6>Use NBP ratio</h6>
-                </Col>
-                <Col sm={{ span: 6, offset: 0 }} md={{ span: 5, offset: 1 }} lg={{ span: 5, offset: 1 }}>
-                    <h6>Use manual ratio</h6>
-                </Col>
-            </Row>)
-
-        const radioList = (
-            <RadioGroup className="text-left"
-                name="listAnswer"
-                selectedValue={radioButtonSelected}
-                onChange={this.handleChangeRadio}>
-                <Row>
-                    <Col sm={{ span: 1, offset: 3 }} md={{ span: 1, offset: 2 }} lg={{ span: 1, offset: 2 }}>
-                        <label> <Radio value="0" /> </label>
-                    </Col>
-                    <Col sm={{ span: 1, offset: 3 }} md={{ span: 4, offset: 4 }} lg={{ span: 3, offset: 3 }}>
-                        <label> <Radio value="1" /> </label>
-                    </Col>
-                </Row>
-            </RadioGroup>)
-
-        if (!editRate) {
-            manualRateButt = (
-                <Col sm={{ span: 5, offset: 0 }} md={{ span: 5, offset: 1 }} lg={{ span: 4, offset: 1 }}>
-                    <div style={{ marginBottom: 5 }} className="input-group">
-                        <input type="text" disabled className="form-control" name="rateManual" onChange={this.onChange} value={rateManual} placeholder="Manual rate" />
-                        <i className="fas fa-pencil-alt"
-                            style={{ cursor: 'pointer', color: 'black', marginRight: '1rem' }}
-                            onClick={this.editManualRate} />
-                    </div>
-                </Col>
-            )
-        } else {
-            let invRate = ""
-            let dangerMsg = (<></>)
-            if (!(isInvalidRate === "")) {
-                invRate = "form-control is-invalid"
-                dangerMsg = (<span className="help-block text-danger"><h6>{isInvalidRate}</h6></span>)
-            } else { invRate = "form-control" }
-            manualRateButt = (
-                <Col sm={{ span: 5, offset: 1 }} md={{ span: 5, offset: 1 }} lg={{ span: 4, offset: 1 }}>
-                    <div style={{ marginBottom: 5 }} className="input-group">
-                        <input type="text" className={invRate} name="rateManualNew" onChange={this.onChange} value={rateManualNew} placeholder="Manual rate" />
-                        <i className="fas fa-check"
-                            style={{ cursor: 'pointer', color: 'black', marginRight: '1rem' }}
-                            onClick={this.resetManualRate} />
-                    </div>
-                    <div> {dangerMsg} </div>
-                </Col>)
-        }
-        let rates = (
-            <Row>
-                <Col sm={{ span: 5, offset: 1 }} md={{ span: 4, offset: 1 }} lg={{ span: 3, offset: 1 }}>
-                    <div style={{ marginBottom: 5 }} className="input-group">
-                        <input type="text" disabled className="form-control" value={rateNBP} />
-                    </div>
-                </Col >
-                {manualRateButt}
-            </Row>)
-
-        let tNm = ""
-        let tEur = 0
-        let tPln = 0
-        if (currMax.length > 0) {
-            tNm = currMax[1]
-            tEur = currMax[0].toFixed(2)
-            tPln = (currMax[0] * currentRate).toFixed(2)
-        }
-        let maxStr = (<> <br />
-            <Row>
-                <Col sm={{ offset: 1 }}>
-                    <b>Max</b> transaction: "{tNm}":   <b>{tEur}</b> EUR / <b>{tPln}</b> PLN
-                    </Col>
-            </Row > </>)
-
-        tEur = 0
-        tPln = 0
-        if (currSum > 0) {
-            tEur = currSum.toFixed(2)
-            tPln = (currSum * currentRate).toFixed(2)
-        }
-        let sumStr = (<> <br />
-            <Row>
-                <Col sm={{ offset: 1 }}>
-                    <b>Sum</b> all transactions: <b>{tEur}</b> EUR / <b>{tPln}</b> PLN
-                    </Col>
-            </Row > </>)
-
-        let invAmnt = ""
-        let dangerMsgAmnt = (<></>)
-        if (!(isInvalidAmount === "")) {
-            invAmnt = "form-control is-invalid"
-            dangerMsgAmnt = (<span className="help-block text-danger"><h6>{isInvalidAmount}</h6></span>)
-        } else { invAmnt = "form-control" }
-
-        let invName = ""
-        let dangerMsgName = (<></>)
-        if (!(isInvalidName === "")) {
-            invName = "form-control is-invalid"
-            dangerMsgName = (<span className="help-block text-danger"><h6>{isInvalidName}</h6></span>)
-        } else { invName = "form-control" }
-
-        let addTransaction = (<>
-            <Row>
-                <Col sm={{ span: 5, offset: 1 }} md={{ span: 5, offset: 2 }} lg={{ span: 4, offset: 3 }}>
-                    <b>TRN name:</b>
-                </Col>
-                <Col sm={{ span: 5, offset: 1 }} md={{ span: 4, offset: 1 }} lg={{ span: 3, offset: 1 }}>
-                    <b>Amount:</b>
-                </Col>
-            </Row>
-            <Row>
-                <Col sm={{ span: 5, offset: 1 }} md={{ span: 6, offset: 1 }} lg={{ span: 6, offset: 1 }}>
-                    <div style={{ marginBottom: 5 }} className="input-group">
-                        <input type="text" className={invName} name="addTrnName" onChange={this.onChange} value={addTrnName} placeholder="shopping" />
-                    </div>
-                    <div> {dangerMsgName} </div>
-                </Col>
-                <Col sm={{ span: 5, offset: 1 }} md={{ span: 4, offset: 1 }} lg={{ span: 3, offset: 1 }}>
-                    <div style={{ marginBottom: 5 }} className="input-group">
-                        <input type="text" className={invAmnt} name="addAmount" onChange={this.onChange} value={addAmount} placeholder="99.99" />
-                    </div>
-                    <div> {dangerMsgAmnt} </div>
-                </Col>
-            </Row>
-            <br />
-            <Row>
-                <Col sm={{ span: 4, offset: 3 }} md={{ span: 4, offset: 4 }} lg={{ span: 4, offset: 4 }}>
-                    <input type="submit" value="Add transaction" className="btn btn-primary" onClick={this.handleSubmit} />
-                </Col>
-            </Row>
-        </>
-        )
-
-        let plusMinus
-        if (!expended) {
-            plusMinus = (
-                <Col md={{ span: 1, offset: 1 }}>
-                    <i className="fas fa-plus"
-                        style={{ cursor: 'pointer', color: 'green' }}
-                        onClick={this.onPlusMinusClick} />
-                </Col>)
-        } else {
-            plusMinus = (
-                <Col md={{ span: 1, offset: 1 }}>
-                    <i className="fas fa-minus"
-                        style={{ cursor: 'pointer', color: 'green' }}
-                        onClick={this.onPlusMinusClick} />
-                </Col>)
-        }
+        const { radioButtonSelected, isInvalidRate, isInvalidAmount, isInvalidName, rateManual, rateManualNew, rateNBP,
+            editRate, currentRate, addAmount, addTrnName, sortBy, expended } = this.state
+        let leftCol, rightCol
 
         let aboutInfo
         if (expended) { aboutInfo = (<About />) } else { aboutInfo = (<></>) }
 
         leftCol = (<> <br />
-            {headerRadio}
-            {radioList}
-            {rates}
-            <br /> <br />
-            {maxStr}
-            {sumStr}
-            <br /><br /><br />
-            <Row>
-                <Col sm={{ offset: 1 }}> <h5>Add new transaction in <b>EUR</b>:</h5> </Col>
-            </Row>
-            <br />
-            {addTransaction}
-            <br /><br /><br />
-            <Row> {plusMinus} About </Row>
+            <HeaderRadio />
+            <RadioList cb={this.handleChangeRadioCB} radioButtonSelected={radioButtonSelected} />
+            <Rates editManualRateCB={this.editManualRateCB} resetManualRateCB={this.resetManualRateCB} onChangeCB={this.onChange} editRate={editRate}
+                isInvalidRate={isInvalidRate} name="rateManual" value={rateManual} newName="rateManualNew" newValue={rateManualNew} rateNBP={rateNBP} />
+            <MaxItem currMax={currMax} currentRate={currentRate}/>
+            <SumAll currSum={currSum} currentRate={currentRate}/>
+            <AddTrn isInvalidAmount={isInvalidAmount} isInvalidName={isInvalidName} onChangeCB={this.onChange}
+                name="addTrnName" value={addTrnName} nameAmnt="addAmount" valueAmnt={addAmount} handleSubmitCB={this.handleSubmit}/>
+            <PlusMinus expended={expended} onPlusMinusClick={this.onPlusMinusClick} />
             <Row> {aboutInfo} </Row>
         </>)
 
-        let sortNameUp = (
-            <i className="fas fa-arrow-up"
-                style={{ cursor: 'pointer', color: 'black', marginLeft: '1rem' }}
-                onClick={this.handleSortNameUp} />
-        )
-        let sortNameDown = (
-            <i className="fas fa-arrow-down"
-                style={{ cursor: 'pointer', color: 'black' }}
-                onClick={this.handleSortNameDown} />
-        )
-        let sortAmntUp = (
-            <i className="fas fa-arrow-up"
-                style={{ cursor: 'pointer', color: 'black', marginLeft: '1rem' }}
-                onClick={this.handleSortAmntUp} />
-        )
-        let sortAmntDown = (
-            <i className="fas fa-arrow-down"
-                style={{ cursor: 'pointer', color: 'black' }}
-                onClick={this.handleSortAmntDown} />
-        )
-
-        if (sortBy === 1) { sortNameUp = (<></>) }
-        if (sortBy === 2) { sortNameDown = (<></>) }
-        if (sortBy === 3) { sortAmntUp = (<></>) }
-        if (sortBy === 4) { sortAmntDown = (<></>) }
         rightCol = (<> <br />
-            <Row>
-                <Col sm={{ span: 5, offset: 1 }}>
-                    Sort by <b>name</b>:
-                        {sortNameUp}
-                    {sortNameDown}
-                </Col>
-                <Col sm={{ span: 6, offset: 0 }}>
-                    Sort by <b>amount</b>:
-                        {sortAmntUp}
-                    {sortAmntDown}
-                </Col>
-            </Row>
+            <SortBy handleSortNameUp={this.handleSortNameUp} handleSortNameDown={this.handleSortNameDown}
+                handleSortAmntUp={this.handleSortAmntUp} handleSortAmntDown={this.handleSortAmntDown} sortBy={sortBy}/>
             <TrnsList trns={currTrns} sortBy={sortBy} rate={currentRate} />
         </>)
 
